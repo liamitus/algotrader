@@ -78,7 +78,7 @@ class OptionInstrument extends Robinhood {
 				uri: "https://api.robinhood.com/options/instruments/",
 				headers: Object.assign({
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				}, HEADERS),
 				qs: {
 					chain_symbol: instrument.symbol,
 					type: side,
@@ -112,7 +112,7 @@ class OptionInstrument extends Robinhood {
 				uri: 'https://api.robinhood.com/marketdata/options/',
 				headers: Object.assign({
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				}, HEADERS),
 				qs: {
 					instruments: instruments.map(ins => {
 						return ins.getInstrumentURL();
@@ -148,7 +148,7 @@ class OptionInstrument extends Robinhood {
 				uri: "https://api.robinhood.com/options/chains/",
 				headers: Object.assign({
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				}, HEADERS),
 				qs: {
 					equity_instrument_ids: instrument.id,
 					state: "active",
