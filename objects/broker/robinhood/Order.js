@@ -88,7 +88,7 @@ class Order extends Robinhood {
 				uri: _this.url + "/orders/",
 				headers: Object.assign({
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				}, HEADERS),
 				form: {
 					account: _this.url + "/accounts/" + _this.user.getAccountNumber() + "/",
 					instrument: _this.order.instrument.urls.instrument,
