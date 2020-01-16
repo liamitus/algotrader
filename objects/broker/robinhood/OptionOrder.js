@@ -5,6 +5,8 @@ const _ = require('lodash');
 const uuidv4 = require('uuid/v4');
 const assert = require('assert');
 
+const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
+
 /**
  * Represents and executes an order for the given option contract.
  */
@@ -86,9 +88,9 @@ class OptionOrder extends Robinhood {
 			if (_this.executed) reject('This order has already been executed!');
 			else request.post({
 				uri: _this.url + "/options/orders/",
-				headers: {
-					'Authorization': 'Bearer ' + _this.user.getAuthToken()
-				},
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS)
 				json: _this.form,
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, JSON.stringify(body), _this.user.getAuthToken(), res => {
@@ -110,9 +112,9 @@ class OptionOrder extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: "https://api.robinhood.com/options/orders/",
-				headers: {
+				headers: Object.assign({
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}
+				}, HEADERS)
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, user.getAuthToken(), res => {
 					let array = [];

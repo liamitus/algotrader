@@ -3,6 +3,8 @@ const async = require('async');
 const request = require('request');
 const ora = require('ora');
 
+const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
+
 /**
  * Robinhood superclass.
  * @author Torrey Leonard <https://github.com/Ladinn>
@@ -36,10 +38,11 @@ class Robinhood {
 				async.whilst(() => { return next !== null; }, callback => {
 					let options = {
 						uri: next
+            headers: HEADERS,
 					};
-					if (token !== null) options.headers = {
+					if (token !== null) options.headers = Object.assign({
 						'Authorization': 'Bearer ' + token
-					};
+					}, HEADERS);
 					request(options, (error, response, body) => {
 						if (error) reject(error);
 						else if (response.statusCode !== 200) reject(new LibraryError(body));

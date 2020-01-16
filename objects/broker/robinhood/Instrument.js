@@ -7,6 +7,8 @@ const LibraryError = require('../../globals/LibraryError');
 const request = require('request');
 const async = require('async');
 
+const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
+
 /**
  * Represents a security traded on Robinhood.
  */
@@ -58,6 +60,7 @@ class Instrument extends Robinhood {
 	static getAll() {
 		return new Promise((resolve, reject) => {
 			request({
+        headers: HEADERS,
 				uri: "https://api.robinhood.com/instruments/"
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
@@ -81,6 +84,7 @@ class Instrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			if (!symbol instanceof String) reject(new Error("Parameter 'symbol' must be a string."));
 			else request({
+        headers: HEADERS,
 				uri: "https://api.robinhood.com/instruments/",
 				qs: {
 					symbol: symbol
@@ -104,6 +108,7 @@ class Instrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			if (!id instanceof String) reject(new Error("Parameter 'id' must be a string."));
 			else request({
+        headers: HEADERS,
 				uri: "https://api.robinhood.com/instruments/" + id + "/"
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
@@ -123,6 +128,7 @@ class Instrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			if (!instrumentURL instanceof String) reject(new Error("Parameter 'instrumentURL' must be a string."));
 			request({
+        headers: HEADERS,
 				uri: instrumentURL
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
@@ -141,6 +147,7 @@ class Instrument extends Robinhood {
 	static getTopMoving(direction) {
 		return new Promise((resolve, reject) => {
 			request({
+        headers: HEADERS,
 				uri: "https://api.robinhood.com/midlands/movers/sp500/",
 				qs: {
 					direction: direction.toLowerCase()
@@ -182,6 +189,7 @@ class Instrument extends Robinhood {
 					let newIds = ids.slice(0, maxAtOnce);
 					ids = ids.length >= maxAtOnce ? ids.slice(maxAtOnce, ids.length) : [];
 					request({
+            headers: HEADERS,
 						uri: "https://api.robinhood.com/instruments/",
 						qs: {
 							ids: newIds.join(',')
@@ -225,6 +233,7 @@ class Instrument extends Robinhood {
 	static getByCategory(category) {
 		return new Promise((resolve, reject) => {
 			request({
+        headers: HEADERS,
 				uri: "https://api.robinhood.com/midlands/tags/tag/" + category + "/"
 			}, (error, response, body) => {
 				Robinhood.handleResponse(error, response, body, null, res => {
@@ -266,9 +275,9 @@ class Instrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: "https://analytics.robinhood.com/instruments/tag/for-you/",
-				headers: {
+				headers: Object.assign({
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}
+				}, HEADERS)
 			}, (error, response, body) => {
 				Robinhood.handleResponse(error, response, body, null, res => {
 					let array = [];
@@ -350,9 +359,9 @@ class Instrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: _this.urls.quote,
-				headers: {
-					Authorization: 'Bearer ' + user.getAuthToken()
-				}
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS)
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
 					resolve(new Quote(
@@ -394,6 +403,7 @@ class Instrument extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
+        headers: HEADERS,
 				uri: _this.urls.splits
 			}, (error, response, body) =>
 				Robinhood.handleResponse(error, response, body, null, resolve, reject)
@@ -410,6 +420,7 @@ class Instrument extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
+        headers: HEADERS,
 				uri: _this.url + "/marketdata/earnings/",
 				qs: {
 					symbol: _this.symbol
@@ -430,6 +441,7 @@ class Instrument extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
+        headers: HEADERS,
 				uri: "https://analytics.robinhood.com/instruments/price_distribution/" + _this.id
 			}, (error, response, body) => {
 				Robinhood.handleResponse(error, response, body, null, res => {
@@ -456,6 +468,7 @@ class Instrument extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
+        headers: HEADERS,
 				uri: _this.url + "/instruments/popularity/",
 				qs: {
 					ids: _this.id
@@ -480,6 +493,7 @@ class Instrument extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
+        headers: HEADERS,
 				uri: _this.url + "/midlands/ratings/",
 				qs: {
 					ids: _this.id
