@@ -37,7 +37,7 @@ class Robinhood {
 				let next = json.next;
 				async.whilst(() => { return next !== null; }, callback => {
 					let options = {
-						uri: next
+						uri: next,
             headers: HEADERS,
 					};
 					if (token !== null) options.headers = Object.assign({
