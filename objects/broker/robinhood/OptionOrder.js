@@ -90,7 +90,7 @@ class OptionOrder extends Robinhood {
 				uri: _this.url + "/options/orders/",
 				headers: Object.assign({
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				}, HEADERS),
 				json: _this.form,
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, JSON.stringify(body), _this.user.getAuthToken(), res => {
