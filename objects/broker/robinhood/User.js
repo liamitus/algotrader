@@ -37,15 +37,10 @@ class User extends Robinhood {
 		this.expires = null; // Auth expiration date (24 hours after login)
 		this.refreshToken = null; // Refresh token can be used to obtain another access token after auth expiration
 
-		const {
-			doNotSaveToDisk = false,
-			serializedUserFile = path.join(__dirname, 'User.json')
-		} = options;
-
 		// File to save the serialized user
-		this.serializedUserFile = serializedUserFile;
+		this.serializedUserFile = (options && options.serializedUserFile) || path.join(__dirname, 'User.json');
 		// Will avoid saving the serialized user to disk, and instead will let the consumer store the user as needed (ie: database)
-		this.doNotSaveToDisk = doNotSaveToDisk;
+		this.doNotSaveToDisk = (options && options.doNotSaveToDisk) || false;
 	}
 
 	/**
@@ -294,7 +289,7 @@ class User extends Robinhood {
 	 * @author Torrey Leonard <https://github.com/Ladinn>
 	 * @returns {Promise<User>}
 	 */
-	static load(serializedUser) {
+	static load(pathToUserFile) {
 		return new Promise((resolve, reject) => {
 			const _load = (data) => {
 				this.deserialize(data)
@@ -307,10 +302,7 @@ class User extends Robinhood {
 						})
 						.catch(error => reject(error));
 			}
-			if (this.doNotSaveToDisk) {
-				_load(serializedUser);
-			}
-			fs.readFile(this.serializedUserFile, 'utf8', (error, data) => {
+			fs.readFile(pathToUserFile, 'utf8', (error, data) => {
 				if (error) {
 					if (error.errno === -2) reject(new Error("A saved user does not exist!"));
 					else reject(error);
