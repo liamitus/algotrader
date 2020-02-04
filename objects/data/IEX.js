@@ -4,6 +4,7 @@ const News = require('./News');
 const request = require('request');
 
 const url = "https://api.iextrading.com/1.0/";
+const token = process.env.IEX_CLOUD_API_KEY
 
 /**
  * Used to interact with the IEX api. See the official documentation for more: https://iextrading.com/developer/docs/#last
@@ -17,7 +18,7 @@ class IEX {
 	static _request(endpoint, qs) {
 		return new Promise((resolve, reject) => {
 			request({
-				uri: url + endpoint,
+				uri: url + endpoint + `?token=${token}`,
 				qs: qs
 			}, (error, response, body) => {
 				if (error) reject(error);
