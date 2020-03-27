@@ -15,9 +15,13 @@ class IEX {
 	 * @private
 	 */
 	static _request(endpoint, qs) {
+    if (!process.env.IEX_CLOUD_API_KEY) {
+      throw Error('IEX_CLOUD_API_KEY env variable must be set to use IEX data')
+    }
 		return new Promise((resolve, reject) => {
+      const tokenStr = `?token=${process.env.IEX_CLOUD_API_KEY}`
 			request({
-				uri: url + endpoint,
+				uri: url + endpoint + tokenStr,
 				qs: qs
 			}, (error, response, body) => {
 				if (error) reject(error);
