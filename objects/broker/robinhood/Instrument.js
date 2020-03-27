@@ -347,7 +347,7 @@ class Instrument extends Robinhood {
 	 * @returns {Promise<Fundamentals>}
 	 */
 	getFundamentals() {
-		return Fundamentals.getByURL(this.urls.fundamentals);
+		return Fundamentals.getByURL(this.urls.fundamentals, this.user);
 	}
 
 	/**

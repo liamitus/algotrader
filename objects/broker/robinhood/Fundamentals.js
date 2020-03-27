@@ -79,12 +79,14 @@ class Fundamentals extends Robinhood {
 	 * @param {String} url
 	 * @returns {Promise<Fundamentals>}
 	 */
-	static getByURL(url) {
+	static getByURL(url, user) {
 		return new Promise((resolve, reject) => {
 			if (!url instanceof String) reject(new Error("Parameter 'url' must be a string."));
 			else request({
-        headers: HEADERS,
-				uri: url
+				uri: url,
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS)
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
 					resolve(new Fundamentals(res));
