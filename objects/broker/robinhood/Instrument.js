@@ -125,8 +125,7 @@ class Instrument extends Robinhood {
 	 * @param {String} instrumentURL
 	 * @returns {Promise<Instrument>}
 	 */
-	static getByURL(instrumentURL) {
-    const user = this.user;
+	static getByURL(instrumentURL, user) {
 		return new Promise((resolve, reject) => {
 			if (!instrumentURL instanceof String) reject(new Error("Parameter 'instrumentURL' must be a string."));
 			request({
@@ -149,7 +148,7 @@ class Instrument extends Robinhood {
 	 * @param {String} direction - Possible options: [up, down]
 	 * @returns {Promise<Instrument>}
 	 */
-	static getTopMoving(direction) {
+	static getTopMoving(direction, user) {
 		return new Promise((resolve, reject) => {
 			request({
         headers: HEADERS,
@@ -161,7 +160,7 @@ class Instrument extends Robinhood {
 				Robinhood.handleResponse(error, response, body, null, res => {
 					let array = [];
 					async.forEachOf(res, (value, key, callback) => {
-						Instrument.getByURL(value.instrument_url).then(ins => {
+						Instrument.getByURL(value.instrument_url, user).then(ins => {
 							array.push(ins);
 							callback();
 						}).catch(error => reject(new RequestError(error)));
