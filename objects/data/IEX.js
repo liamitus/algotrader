@@ -3,7 +3,7 @@ const LibraryError = require('../globals/LibraryError');
 const News = require('./News');
 const request = require('request');
 
-const url = "https://api.iextrading.com/1.0/";
+const url = "https://cloud.iexapis.com/stable";
 
 /**
  * Used to interact with the IEX api. See the official documentation for more: https://iextrading.com/developer/docs/#last
@@ -47,7 +47,7 @@ class IEX {
 	 * @returns {Promise<Quote>}
 	 */
 	static getQuote(symbol) {
-		return IEX._request(`stock/${symbol}/book`).then((json, body) => {
+		return IEX._request(`/stock/${symbol}/book`).then((json, body) => {
 			return new Quote({
 				symbol: symbol,
 				date: new Date(json.quote.latestUpdate),
