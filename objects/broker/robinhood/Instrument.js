@@ -20,7 +20,7 @@ class Instrument extends Robinhood {
 	 * @constructor
 	 * @param {Object} object
 	 */
-	constructor(object) {
+	constructor(object, user) {
 		if (!object instanceof Object) throw new Error("Parameter 'object' must be an object.");
 		else {
 			super();
@@ -46,6 +46,7 @@ class Instrument extends Robinhood {
 				dayTradeRatio: Number(object.day_trade_ratio),
 				maintenanceRatio: Number(object.maintenance_ratio)
 			}
+      this.user = user;
 		}
 	}
 
@@ -80,7 +81,7 @@ class Instrument extends Robinhood {
 	 * @param {String} symbol
 	 * @returns {Promise<Instrument>}
 	 */
-	static getBySymbol(symbol) {
+	static getBySymbol(symbol, user) {
 		return new Promise((resolve, reject) => {
 			if (!symbol instanceof String) reject(new Error("Parameter 'symbol' must be a string."));
 			else request({
@@ -92,7 +93,7 @@ class Instrument extends Robinhood {
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
 					if (res.length !== undefined) reject(new LibraryError("Invalid instrument symbol."));
-					else resolve(new Instrument(res));
+					else resolve(new Instrument(res, user));
 				}, reject);
 			})
 		})
@@ -104,7 +105,7 @@ class Instrument extends Robinhood {
 	 * @param {String} id
 	 * @returns {Promise<Instrument>}
 	 */
-	static getByID(id) {
+	static getByID(id, user) {
 		return new Promise((resolve, reject) => {
 			if (!id instanceof String) reject(new Error("Parameter 'id' must be a string."));
 			else request({
@@ -112,7 +113,7 @@ class Instrument extends Robinhood {
 				uri: "https://api.robinhood.com/instruments/" + id + "/"
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
-					resolve(new Instrument(res));
+					resolve(new Instrument(res, user));
 				}, reject);
 			})
 		})
@@ -125,11 +126,15 @@ class Instrument extends Robinhood {
 	 * @returns {Promise<Instrument>}
 	 */
 	static getByURL(instrumentURL) {
+    const user = this.user;
 		return new Promise((resolve, reject) => {
 			if (!instrumentURL instanceof String) reject(new Error("Parameter 'instrumentURL' must be a string."));
 			request({
         headers: HEADERS,
-				uri: instrumentURL
+				uri: instrumentURL,
+        headers: {
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
 					resolve(new Instrument(res));
@@ -307,7 +312,7 @@ class Instrument extends Robinhood {
 	 * @param {User} user - Authenticated user object
 	 * @returns {Promise<Array>}
 	 */
-	populate(user) {
+	populate() {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			Promise.all([
