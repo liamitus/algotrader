@@ -3,6 +3,17 @@ const Robinhood = require('../broker/robinhood/Robinhood');
 const request = require('request');
 const cheerio = require('cheerio');
 
+const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
+
+const DEBUGGING = false;
+//const DEBUGGING = true;
+function d(...any) {
+  if (!DEBUGGING) {
+    return
+  }
+  console.log(...any)
+}
+
 /**
  * Find and filter securities based on certain criteria.
  */
@@ -209,10 +220,13 @@ class Query {
 	 * @param {Number} days
 	 * @returns {Promise<Array>}
 	 */
-	static getEarnings(days) {
+	static getEarnings(days, user) {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: "https://api.robinhood.com/marketdata/earnings/",
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS),
 				qs: {
 					range: days + "day"
 				}
@@ -230,6 +244,7 @@ class Query {
 	 */
 	static getEarningsBySymbol(symbol) {
 		return new Promise((resolve, reject) => {
+      d("http://finance.yahoo.com/q/ks?s=" + symbol)
 			request({
 				uri: "http://finance.yahoo.com/q/ks?s=",
 				qs: {

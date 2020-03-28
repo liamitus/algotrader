@@ -13,8 +13,9 @@ class Fundamentals extends Robinhood {
 	 * @author Torrey Leonard <https://github.com/Ladinn>
 	 * @param {Object} object
 	 */
-	constructor(object) {
+	constructor(object, user) {
 		if (!object instanceof Object) throw new Error("Parameter 'object' must be an object.");
+		else if (!user) throw new Error("Parameter 'user' must be set.");
 		else {
 			super();
 			this.open = Number(object.open);
@@ -28,6 +29,7 @@ class Fundamentals extends Robinhood {
 			this.dividendYield = Number(object.dividend_yield);
 			this.peRatio = Number(object.pe_ratio);
 			this.description = String(object.description);
+      this.user = user;
 		}
 	}
 
@@ -37,15 +39,18 @@ class Fundamentals extends Robinhood {
 	 * @param {String} symbol
 	 * @returns {Promise<Fundamentals>}
 	 */
-	static getBySymbol(symbol) {
+	static getBySymbol(symbol, user) {
 		return new Promise((resolve, reject) => {
 			if (!symbol instanceof String) reject(new Error("Parameter 'symbol' must be a string."));
+			else if (!user) reject(new Error("Parameter 'user' must be set."));
 			else request({
-        headers: HEADERS,
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS),
 				uri: "https://api.robinhood.com/fundamentals/" + symbol + "/"
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
-					resolve(new Fundamentals(res));
+					resolve(new Fundamentals(res, user));
 				}, reject);
 			})
 		})
@@ -57,16 +62,19 @@ class Fundamentals extends Robinhood {
 	 * @param {Array} array
 	 * @returns {Promise<Array>}
 	 */
-	static getBySymbolArray(array) {
+	static getBySymbolArray(array, user) {
 		return new Promise((resolve, reject) => {
 			if (!array instanceof Array) reject(new Error("Parameter 'array' must be an array."));
+			else if (!user) reject(new Error("Parameter 'user' must be set."));
 			else request({
-        headers: HEADERS,
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS),
 				uri: "https://api.robinhood.com/fundamentals/?symbols=" + array.join()
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
 					let array = [];
-					res.forEach(q => array.push(new Fundamentals(q)));
+					res.forEach(q => array.push(new Fundamentals(q, user)));
 					resolve(array);
 				}, reject);
 			})
@@ -82,6 +90,7 @@ class Fundamentals extends Robinhood {
 	static getByURL(url, user) {
 		return new Promise((resolve, reject) => {
 			if (!url instanceof String) reject(new Error("Parameter 'url' must be a string."));
+			else if (!user) reject(new Error("Parameter 'user' must be set."));
 			else request({
 				uri: url,
 				headers: Object.assign({
@@ -89,7 +98,7 @@ class Fundamentals extends Robinhood {
 				}, HEADERS)
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
-					resolve(new Fundamentals(res));
+					resolve(new Fundamentals(res, user));
 				}, reject);
 			})
 		})

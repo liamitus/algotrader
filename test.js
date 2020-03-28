@@ -17,27 +17,32 @@ const Robinhood = algotrader.Robinhood;
 const Instrument = Robinhood.Instrument;
 const Fundamentals = Robinhood.Fundamentals;
 const Market = Robinhood.Market;
+let rh;
+
+test.before(async t => {
+  rh = await Robinhood.User.getOrAuthenticate();
+})
 
 test('broker | robinhood > get instrument', t => {
-	return Instrument.getBySymbol("MCD").then(res => {
+	return Instrument.getBySymbol("MCD", rh).then(res => {
 		t.true(res.constructor.name === "Instrument");
 	}).catch(error => t.fail(error));
 });
 
 test('broker | robinhood > get top moving instruments', t => {
-	return Instrument.getTopMoving("up").then(res => {
+	return Instrument.getTopMoving("up", rh).then(res => {
 		t.true(res.length > 0 && res[0].constructor.name === "Instrument");
 	}).catch(error => t.fail(error));
 });
 
 test('broker | robinhood > get most popular instruments', t => {
-	return Instrument.getMostPopular().then(res => {
+	return Instrument.getMostPopular(rh).then(res => {
 		t.true(res.length > 0 && res[0].constructor.name === "Instrument");
 	}).catch(error => t.fail(error));
 });
 
 test('broker | robinhood > get quote', t => {
-	return Instrument.getBySymbol("CMCSA").then(res => {
+	return Instrument.getBySymbol("CMCSA", rh).then(res => {
 		return res.getQuote().then(quote => {
 			t.true(quote.constructor.name === "Quote");
 		}).catch(error => t.fail(error));
@@ -45,7 +50,7 @@ test('broker | robinhood > get quote', t => {
 });
 
 test('broker | robinhood > get fundamentals', t => {
-	return Fundamentals.getBySymbol("CRM").then(res => {
+	return Fundamentals.getBySymbol("CRM", rh).then(res => {
 		t.true(res.constructor.name === "Fundamentals");
 	}).catch(error => t.fail(error));
 });
@@ -103,7 +108,7 @@ test('data | query > get top ETFs', t => {
 });
 
 test('data | query > get similar', t => {
-	return Query.getSimilar("DPS").then(res => {
+	return Query.getSimilar("BAC").then(res => {
 		t.true(res.length > 0);
 	}).catch(error => t.fail(error));
 });
@@ -115,12 +120,13 @@ test('data | query > get trending symbols', t => {
 });
 
 test('data | query > get earnings', t => {
-	return Query.getEarnings(5).then(res => {
+	return Query.getEarnings(5, rh).then(res => {
 		t.true(res.length > 0);
 	}).catch(error => t.fail(error));
 });
 
-test('data | query > get earnings by symbol', t => {
+// TODO This API is no longer suppported.
+test.skip('data | query > get earnings by symbol', t => {
 	return Query.getEarningsBySymbol("BAC").then(res => {
 		t.true(res.length > 0);
 	}).catch(error => t.fail(error));
@@ -130,7 +136,8 @@ test('data | query > get earnings by symbol', t => {
 
 const Stream = algotrader.Data.Stream;
 
-test('data | stream > start stream', t => {
+// TODO This API is no longer suppported.
+test.skip('data | stream > start stream', t => {
 	return new Promise(resolve => {
 		const s = new Stream([ "EXC", "MET", "HAS", "ATVI", "PEP" ]);
 		s.start();
@@ -172,14 +179,14 @@ test('data | nasdaq > get listings', t => {
 
 const IEX = algotrader.Data.IEX;
 
-Object.getOwnPropertyNames(IEX).forEach(f => {
-	if (['length', 'prototype', '_request', 'getBatchQuotes', 'name'].indexOf(f) === -1)
-		test('data | IEX > ' + f, t => {
-			return IEX[f]("AAPL").then(res => {
-				t.true(res !== undefined)
-			}).catch(error => t.fail(error));
-		});
-});
+//Object.getOwnPropertyNames(IEX).forEach(f => {
+	//if (['length', 'prototype', '_request', 'getBatchQuotes', 'name'].indexOf(f) === -1)
+		//test('data | IEX > ' + f, t => {
+			//return IEX[f]("AAPL").then(res => {
+				//t.true(res !== undefined)
+			//}).catch(error => t.fail(error));
+		//});
+//});
 
 /**
  * Algorithm Library
@@ -190,8 +197,9 @@ Object.getOwnPropertyNames(IEX).forEach(f => {
 const Scheduler = algotrader.Algorithm.Scheduler;
 
 test('algorithm | scheduler > create and cancel job', t => {
-	return Scheduler.onMarketOpen(0, () => { }).then(job => {
-		t.true(job.constructor.name === "Job");
-		Scheduler.cancel(job);
+  const scheduler = new Scheduler(() => {})
+	return scheduler.onMarketOpen(0).then(job => {
+		t.true(job.constructor.name === "Date");
+		scheduler.cancel(job);
 	}).catch(error => t.fail(error));
 });

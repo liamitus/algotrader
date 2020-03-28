@@ -4,7 +4,7 @@
   "description": "Algorithmically trade stocks and options using Robinhood, Yahoo Finance, and more.",
   "main": "./index.js",
   "scripts": {
-    "test": "ava"
+    "test": "npx ava"
   },
   "repository": {
     "type": "git",

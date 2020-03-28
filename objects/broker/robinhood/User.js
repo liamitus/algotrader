@@ -850,6 +850,71 @@ class User extends Robinhood {
 		})
 	}
 
+
+
+  static getOrAuthenticate() {
+    const username = this.getAndCheckEnv('ROBINHOOD_USERNAME');
+    const password = this.getAndCheckEnv('ROBINHOOD_PASSWORD');
+    const dToken = this.getAndCheckEnv('ROBINHOOD_DTOKEN');
+    const userFile = this.getAndCheckEnv('ROBINHOOD_USER_FILE_PATH');
+
+    const options = {
+      // These appear to be broken as of 01/30/2020
+      doNotSaveToDisk: false,
+      serializedUserFile: userFile,
+    };
+
+    return new Promise((resolve) => {
+      console.debug('Retrieving authenticated Robinhood User...');
+      User.load(userFile)
+        .then((rhUser) => {
+          console.debug('Found saved Robinhood user!');
+          if (!rhUser.isAuthenticated()) {
+            console.debug('Saved user authentication has expired');
+            resolve(authenticateWithRobinhood(rhUser));
+          } else {
+            console.debug('Saved user authentication is valid');
+            resolve(rhUser);
+          }
+        })
+        .catch((error) => {
+          console.debug('Caught exception while loading Robinhood user:');
+          console.debug(error);
+          if (error) {
+            const user = new User(username, password, dToken, options);
+            resolve(authenticateWithRobinhood(user));
+          }
+        });
+    });
+  }
+
+  static authenticateWithRobinhood(user) {
+    console.info('Authenticating with Robinhood...');
+    return new Promise((resolve, reject) => {
+      user.authenticate()
+        .then(() => {
+          console.info('Authenticated with Robinhood!');
+          user.save()
+            .then(() => {
+              console.debug('User data saved');
+              resolve(user);
+            });
+        })
+        .catch((error) => {
+          console.error('Authentication with Robinhood failed');
+          reject(error);
+        });
+    });
+  }
+
+  static getAndCheckEnv(key) {
+    const value = process.env[key];
+    if (!value) {
+      throw Error(`Must set ${key} environment variable! Hint: export ${key}="Some value"`);
+    }
+    return value;
+  }
+
 }
 
 module.exports = User;

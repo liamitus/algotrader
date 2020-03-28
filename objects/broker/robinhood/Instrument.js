@@ -1,5 +1,6 @@
 const Robinhood = require('./Robinhood');
 const Fundamentals = require('./Fundamentals');
+const User = require('./Fundamentals');
 const Market = require('./Market');
 const Quote = require('../../globals/Quote');
 const LibraryError = require('../../globals/LibraryError');
@@ -22,6 +23,7 @@ class Instrument extends Robinhood {
 	 */
 	constructor(object, user) {
 		if (!object instanceof Object) throw new Error("Parameter 'object' must be an object.");
+		else if (!user) throw new Error("Parameter 'user' must be set.");
 		else {
 			super();
 			this.name = String(object.name);
@@ -84,9 +86,12 @@ class Instrument extends Robinhood {
 	static getBySymbol(symbol, user) {
 		return new Promise((resolve, reject) => {
 			if (!symbol instanceof String) reject(new Error("Parameter 'symbol' must be a string."));
+			else if (!user) reject(new Error("Parameter 'user' must be set."));
 			else request({
-        headers: HEADERS,
 				uri: "https://api.robinhood.com/instruments/",
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS),
 				qs: {
 					symbol: symbol
 				}
@@ -108,9 +113,12 @@ class Instrument extends Robinhood {
 	static getByID(id, user) {
 		return new Promise((resolve, reject) => {
 			if (!id instanceof String) reject(new Error("Parameter 'id' must be a string."));
+			else if (!user) reject(new Error("Parameter 'user' must be set."));
 			else request({
-        headers: HEADERS,
-				uri: "https://api.robinhood.com/instruments/" + id + "/"
+				uri: "https://api.robinhood.com/instruments/" + id + "/",
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS),
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
 					resolve(new Instrument(res, user));
@@ -128,15 +136,15 @@ class Instrument extends Robinhood {
 	static getByURL(instrumentURL, user) {
 		return new Promise((resolve, reject) => {
 			if (!instrumentURL instanceof String) reject(new Error("Parameter 'instrumentURL' must be a string."));
+			if (!user) reject(new Error("Parameter 'user' must be set."));
 			request({
-        headers: HEADERS,
 				uri: instrumentURL,
-        headers: {
+				headers: Object.assign({
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}
+				}, HEADERS),
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
-					resolve(new Instrument(res));
+					resolve(new Instrument(res, user));
 				}, reject);
 			})
 		})
@@ -150,9 +158,12 @@ class Instrument extends Robinhood {
 	 */
 	static getTopMoving(direction, user) {
 		return new Promise((resolve, reject) => {
+			if (!user) reject(new Error("Parameter 'user' must be set."));
 			request({
-        headers: HEADERS,
 				uri: "https://api.robinhood.com/midlands/movers/sp500/",
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS),
 				qs: {
 					direction: direction.toLowerCase()
 				}
@@ -163,7 +174,7 @@ class Instrument extends Robinhood {
 						Instrument.getByURL(value.instrument_url, user).then(ins => {
 							array.push(ins);
 							callback();
-						}).catch(error => reject(new RequestError(error)));
+						}).catch(error => reject(new Error(error)));
 					}, () => {
 						resolve(array);
 					})
@@ -183,7 +194,7 @@ class Instrument extends Robinhood {
 	 * @param {Array} ids
 	 * @returns {Promise<Array>}
 	 */
-	static getByIdArray(ids) {
+	static getByIdArray(ids, user) {
 		return new Promise((resolve, reject) => {
 			if (!ids instanceof Array) reject(new Error("Parameter 'ids' must be an array."));
 			else {
@@ -201,7 +212,7 @@ class Instrument extends Robinhood {
 					}, (error, response, body) => {
 						return Robinhood.handleResponse(error, response, body, null, res => {
 							res.forEach(o => {
-								if (o !== null) array.push(new Instrument(o));
+								if (o !== null) array.push(new Instrument(o, user));
 							});
 							callback();
 						}, reject);
@@ -234,10 +245,12 @@ class Instrument extends Robinhood {
 	 * @param {String} category - For possible options see getCategories().
 	 * @returns {Promise<Array>}
 	 */
-	static getByCategory(category) {
+	static getByCategory(category, user) {
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
+				headers: Object.assign({
+					'Authorization': 'Bearer ' + user.getAuthToken()
+				}, HEADERS),
 				uri: "https://api.robinhood.com/midlands/tags/tag/" + category + "/"
 			}, (error, response, body) => {
 				Robinhood.handleResponse(error, response, body, null, res => {
@@ -245,7 +258,7 @@ class Instrument extends Robinhood {
 					res.instruments.forEach(o => {
 						ids.push(o.split('instruments/')[1].split('/')[0]);
 					});
-					return Instrument.getByIdArray(ids).then(res => resolve(res)).catch(error => reject(error));
+					return Instrument.getByIdArray(ids, user).then(res => resolve(res)).catch(error => reject(error));
 				}, reject);
 			});
 		})
@@ -256,8 +269,8 @@ class Instrument extends Robinhood {
 	 * @author Torrey Leonard <https://github.com/Ladinn>
 	 * @returns {Promise<Array>}
 	 */
-	static getMostPopular() {
-		return Instrument.getByCategory("100-most-popular");
+	static getMostPopular(user) {
+		return Instrument.getByCategory("100-most-popular", user);
 	}
 
 	/**
@@ -265,8 +278,8 @@ class Instrument extends Robinhood {
 	 * @author Torrey Leonard <https://github.com/Ladinn>
 	 * @returns {Promise.<Array>}
 	 */
-	static getUpcomingEarnings() {
-		return Instrument.getByCategory("upcoming-earnings");
+	static getUpcomingEarnings(user) {
+		return Instrument.getByCategory("upcoming-earnings", user);
 	}
 
 	/**
@@ -277,6 +290,7 @@ class Instrument extends Robinhood {
 	 */
 	static getRecommendations(user) {
 		return new Promise((resolve, reject) => {
+			if (!user) reject(new Error("Parameter 'user' must be set."));
 			request({
 				uri: "https://analytics.robinhood.com/instruments/tag/for-you/",
 				headers: Object.assign({
@@ -285,7 +299,6 @@ class Instrument extends Robinhood {
 			}, (error, response, body) => {
 				Robinhood.handleResponse(error, response, body, null, res => {
 					let array = [];
-					console.log(res);
 					async.forEachOf(res.instruments, (value, key, callback) => {
 						Instrument.getByID(value.id).then(ins => {
 							array.push({
@@ -358,13 +371,14 @@ class Instrument extends Robinhood {
 	 * @param {User} user - Authenticated user object
 	 * @returns {Promise<Quote>}
 	 */
-	getQuote(user) {
+	getQuote() {
 		const _this = this;
 		return new Promise((resolve, reject) => {
+			if (!_this.user) reject(new Error("Parameter 'user' must be set."));
 			request({
 				uri: _this.urls.quote,
 				headers: Object.assign({
-					'Authorization': 'Bearer ' + user.getAuthToken()
+					'Authorization': 'Bearer ' + _this.user.getAuthToken()
 				}, HEADERS)
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {

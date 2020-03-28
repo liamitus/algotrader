@@ -49,9 +49,16 @@ class Market extends Robinhood {
 	 * @author Torrey Leonard <https://github.com/Ladinn>
 	 * @param {String} code
 	 */
+  static ONE_HOUR = 60 * 60 * 1000;
+  static MICcache = { date: null, value: null };
 	static getByMIC(code) {
 		return new Promise((resolve, reject) => {
 			if (!code instanceof String) reject(new Error("Parameter 'code' must be a string."));
+      const now = new Date();
+      if (this.MICcache[code] && (now - this.MICcache[code].date) < ONE_HOUR) {
+        resolve(this.MICcache[code].value);
+        return;
+      }
 			request({
         headers: HEADERS,
 				uri: "https://api.robinhood.com/markets/" + code + "/"
@@ -63,7 +70,11 @@ class Market extends Robinhood {
 					}, (error, response, body) => {
 						return Robinhood.handleResponse(error, response, body, null, hours => {
 							market.hours = hours;
-							resolve(new Market(market));
+              this.MICcache[code] = {
+                date: now,
+                value: new Market(market)
+              }
+							resolve(this.MICcache[code].value);
 						}, reject);
 					})
 				}, reject);
@@ -178,14 +189,18 @@ class Market extends Robinhood {
 	 */
 	getNextOpen() {
 		const _this = this;
+    let now = moment();
 		return new Promise((resolve, reject) => {
 			let next = null;
-			let days = moment().isAfter(_this.getOpen()) ? 1 : 0;
+			let days = 0;
+			if (!_this.getOpen() || now.isAfter(_this.getOpen())) {
+        days = 1;
+      }
 			async.whilst(
 				() => { return next === null; },
 				callback => {
-					let newDate = moment().add(days, 'days');
-					_this.getHoursOn(newDate.toDate()).then(hours => {
+					now = now.add(days, 'days');
+					_this.getHoursOn(now.toDate()).then(hours => {
 						if (hours.isOpen) next = hours.open;
 						callback();
 					}).catch(error => reject(new LibraryError(error)));
@@ -202,14 +217,18 @@ class Market extends Robinhood {
 	 */
 	getNextClose() {
 		const _this = this;
+    let now = moment();
 		return new Promise((resolve, reject) => {
 			let next = null;
-			let days = moment().isAfter(_this.getClose()) ? 1 : 0;
+			let days = 0;
+			if (!_this.getOpen() || now.isAfter(_this.getOpen())) {
+        days = 1;
+      }
 			async.whilst(
 				() => { return next === null; },
 				callback => {
-					let newDate = moment().add(days, 'days');
-					_this.getHoursOn(newDate.toDate()).then(hours => {
+					now = now.add(days, 'days');
+					_this.getHoursOn(now.toDate()).then(hours => {
 						if (hours.isOpen) next = hours.close;
 						callback();
 					}).catch(error => reject(new LibraryError(error)));
