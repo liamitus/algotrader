@@ -3,8 +3,6 @@ const Robinhood = require('../broker/robinhood/Robinhood');
 const request = require('request');
 const cheerio = require('cheerio');
 
-const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
-
 const DEBUGGING = false;
 //const DEBUGGING = true;
 function d(...any) {
@@ -42,6 +40,16 @@ class Query {
 			})
 		})
 	}
+
+	static getTopMovers(days, user) {
+		return new Promise((resolve, reject) => {
+			Robinhood.request({
+				uri: "https://api.robinhood.com/midlands/tags/tag/top-movers/",
+			}, (error, response, body) => {
+				return Robinhood.handleResponse(error, response, body, null, resolve, reject);
+			})
+		})
+	};
 
 	/**
 	 * Returns an array of quotes for the best performing 'x' amount of stocks.
@@ -222,11 +230,11 @@ class Query {
 	 */
 	static getEarnings(days, user) {
 		return new Promise((resolve, reject) => {
-			request({
+			Robinhood.request({
 				uri: "https://api.robinhood.com/marketdata/earnings/",
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS),
+				},
 				qs: {
 					range: days + "day"
 				}
