@@ -3,8 +3,6 @@ const Robinhood = require('./Robinhood');
 const request = require('request');
 const async = require('async');
 
-const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
-
 /**
  * Represents and executes an order for the given instrument.
  */
@@ -86,9 +84,9 @@ class Order extends Robinhood {
 			if (_this.executed) reject(new Error("Order has already been executed."));
 			else request.post({
 				uri: _this.url + "/orders/",
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS),
+				},
 				form: {
 					account: _this.url + "/accounts/" + _this.user.getAccountNumber() + "/",
 					instrument: _this.order.instrument.urls.instrument,
@@ -132,9 +130,9 @@ class Order extends Robinhood {
 			else {
 				request.post({
 					uri: _this.response.urls.cancel,
-          headers: Object.assign({
+          headers: {
             'Authorization': 'Bearer ' + user.getAuthToken()
-          }, HEADERS)
+          },
 				}, (error, response, body) => {
 					return Robinhood.handleResponse(error, response, body, _this.user.getAuthToken(), resolve, reject);
 				})
@@ -153,9 +151,9 @@ class Order extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: "https://api.robinhood.com/orders/" + orderID + "/",
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				},
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, user.getAuthToken(), res => {
 					resolve(new Order(user, res));
@@ -174,9 +172,9 @@ class Order extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: "https://api.robinhood.com/orders/",
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				},
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, user.getAuthToken(), res => {
 					let array = [];

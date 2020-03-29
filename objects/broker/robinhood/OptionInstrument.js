@@ -3,8 +3,6 @@ const request = require('request');
 const async = require('async');
 const _ = require('lodash');
 
-const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
-
 /**
  * Represents an option traded on Robinhood.
  */
@@ -48,9 +46,9 @@ class OptionInstrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: "https://api.robinhood.com/options/instruments/",
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				}
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, user.getAuthToken(), res => {
 					let instrumentsArray = [];
@@ -76,9 +74,9 @@ class OptionInstrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: "https://api.robinhood.com/options/instruments/",
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS),
+				},
 				qs: {
 					chain_symbol: instrument.symbol,
 					type: side,
@@ -110,9 +108,9 @@ class OptionInstrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: 'https://api.robinhood.com/marketdata/options/',
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS),
+				},
 				qs: {
 					instruments: instruments.map(ins => {
 						return ins.getInstrumentURL();
@@ -146,9 +144,9 @@ class OptionInstrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: "https://api.robinhood.com/options/chains/",
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS),
+				},
 				qs: {
 					equity_instrument_ids: instrument.id,
 					state: "active",
@@ -189,9 +187,9 @@ class OptionInstrument extends Robinhood {
 			if (!url instanceof String) reject(new Error("Parameter 'url' must be a string."));
 			request({
 				uri: url,
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				}
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, user.getAuthToken(), res => {
 					resolve(new OptionInstrument(res));
@@ -210,9 +208,9 @@ class OptionInstrument extends Robinhood {
 		return new Promise((resolve, reject) => {
 			request({
 				uri: "https://api.robinhood.com/options/positions/",
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				}
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, user.getAuthToken(), res => {
 					let array = [];

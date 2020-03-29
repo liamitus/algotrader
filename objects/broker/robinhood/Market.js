@@ -4,8 +4,6 @@ const request = require('request');
 const moment = require('moment');
 const async = require('async');
 
-const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
-
 /**
  * Represents an exchange on which securities are traded.
  */
@@ -60,12 +58,10 @@ class Market extends Robinhood {
         return;
       }
 			request({
-        headers: HEADERS,
 				uri: "https://api.robinhood.com/markets/" + code + "/"
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, market => {
 					request({
-            headers: HEADERS,
 						uri: market.todays_hours
 					}, (error, response, body) => {
 						return Robinhood.handleResponse(error, response, body, null, hours => {
@@ -91,12 +87,10 @@ class Market extends Robinhood {
 		return new Promise((resolve, reject) => {
 			if (!url instanceof String) reject(new Error("Parameter 'url' must be a string."));
 			request({
-        headers: HEADERS,
 				uri: url
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, market => {
 					request({
-            headers: HEADERS,
 						uri: market.todays_hours
 					}, (error, response, body) => {
 						return Robinhood.handleResponse(error, response, body, null, hours => {
@@ -120,7 +114,6 @@ class Market extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.hours.nextTradingDay
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
@@ -139,7 +132,6 @@ class Market extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.hours.previousTradingDay
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
@@ -160,7 +152,6 @@ class Market extends Robinhood {
 		return new Promise((resolve, reject) => {
 			const dateString = moment(date).format("YYYY-MM-DD");
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/markets/" + _this.mic + "/hours/" + dateString + "/"
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {

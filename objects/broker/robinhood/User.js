@@ -13,8 +13,6 @@ const path = require('path');
 const prompt = require('prompt');
 const moment = require('moment');
 
-const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
-
 /**
  * Represents the user that is logged in while accessing the Robinhood API.
  */
@@ -73,7 +71,6 @@ class User extends Robinhood {
 			if (_this.password === undefined)
 				_this.password = password;
 			request.post({
-        headers: HEADERS,
 				uri: _this.url + "/oauth2/token/",
 				form: {
 					username: _this.username,
@@ -122,7 +119,6 @@ class User extends Robinhood {
 		}
 		function _sendMFA(mfaCode, resolve, reject) {
 			request.post({
-        headers: HEADERS,
 				uri: _this.url + '/oauth2/token/',
 				form: {
 					username: _this.username,
@@ -165,7 +161,6 @@ class User extends Robinhood {
 					_this.refreshToken = refreshToken;
 				}
 				request.post({
-          headers: HEADERS,
 					uri: _this.url + "/oauth2/token/",
 					form: {
 						refresh_token: _this.refreshToken,
@@ -201,7 +196,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request.post({
-        headers: HEADERS,
 				uri: _this.url + "/api-token-logout/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -371,7 +365,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/accounts/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -446,7 +439,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/user/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -466,7 +458,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/user/id/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -488,7 +479,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/user/basic_info/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -508,7 +498,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/user/additional_info/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -528,7 +517,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/user/employment/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -548,7 +536,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/user/investment_profile/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -568,7 +555,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/accounts/" + _this.account + "/recent_day_trades/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -615,10 +601,9 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/accounts/" + _this.account + "/positions/",
 				headers: {
-					'Authorization': 'Bearer ' + _this.token
+					'Authorization': 'Bearer ' + _this.getAuthToken()
 				},
 				qs: {
 					nonzero: true
@@ -629,7 +614,7 @@ class User extends Robinhood {
 					async.forEachOf(res, (position, key, callback) => {
 						position.quantity = Number(position.quantity);
 						if (position.quantity !== 0) {
-							Instrument.getByURL(position.instrument).then(instrument => {
+							Instrument.getByURL(position.instrument, _this).then(instrument => {
 								position.InstrumentObject = instrument;
 								array.push(position);
 								callback();
@@ -652,7 +637,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/options/positions/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -687,7 +671,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/portfolios/historicals/" + _this.account,
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -731,7 +714,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + "/ach/relationships/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -760,7 +742,6 @@ class User extends Robinhood {
 				reject(new Error("Provided frequency parameter is invalid: " + frequency + "\nValid input: empty string (one-time deposit), 'weekly,' 'biweekly,' 'monthly,' or 'quarterly.'"));
 			else {
 				request({
-          headers: HEADERS,
 					uri: _this.url + "/ach/deposit_schedules/",
 					headers: {
 						'Authorization': 'Bearer ' + _this.token
@@ -788,7 +769,6 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-        headers: HEADERS,
 				uri: _this.url + /documents/,
 				headers: {
 					'Authorization': 'Bearer ' + _this.token
@@ -820,7 +800,6 @@ class User extends Robinhood {
 					async.whilst(() => { return !downloaded; }, whilstCallback => {
 						let seconds = 0;
 						const req = request({
-              headers: HEADERS,
 							uri: document.download_url,
 							headers: {
 								'Authorization': 'Bearer ' + _this.token

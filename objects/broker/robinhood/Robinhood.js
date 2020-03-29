@@ -3,8 +3,6 @@ const async = require('async');
 const request = require('request');
 const ora = require('ora');
 
-const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
-
 /**
  * Robinhood superclass.
  * @author Torrey Leonard <https://github.com/Ladinn>
@@ -15,6 +13,12 @@ class Robinhood {
 	constructor() {
 		this.url = "https://api.robinhood.com";
 	}
+
+  static request(options, callback) {
+    const withDefaults = headers(options.headers);
+    options.headers = withDefaults;
+    return request(options, callback);
+  }
 
 	static handleResponse(error, response, body, token, resolve, reject) {
 		if (error) reject(error);
@@ -38,11 +42,11 @@ class Robinhood {
 				async.whilst(() => { return next !== null; }, callback => {
 					let options = {
 						uri: next,
-            headers: HEADERS,
+            headers: headers(),
 					};
-					if (token !== null) options.headers = Object.assign({
+					if (token !== null) options.headers = headers({
 						'Authorization': 'Bearer ' + token
-					}, HEADERS);
+					});
 					request(options, (error, response, body) => {
 						if (error) reject(error);
 						else if (response.statusCode !== 200) reject(new LibraryError(body));
@@ -63,6 +67,15 @@ class Robinhood {
 		}
 	}
 
+}
+
+function headers(additionalHeaders) {
+  const obj = additionalHeaders || {};
+  const defaults = {
+    // bamboozle 3rd party APIs to prevent discrimination
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
+  }
+  return Object.assign(obj, defaults);
 }
 
 module.exports = Robinhood;

@@ -1,8 +1,6 @@
 const Robinhood = require('./Robinhood');
 const request = require('request');
 
-const HEADERS = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36'}
-
 /**
  * Market data for the given equity, such as market cap, dividend yield, P/E ratio, description, and more.
  */
@@ -43,10 +41,10 @@ class Fundamentals extends Robinhood {
 		return new Promise((resolve, reject) => {
 			if (!symbol instanceof String) reject(new Error("Parameter 'symbol' must be a string."));
 			else if (!user) reject(new Error("Parameter 'user' must be set."));
-			else request({
-				headers: Object.assign({
+			else Robinhood.request({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS),
+				},
 				uri: "https://api.robinhood.com/fundamentals/" + symbol + "/"
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
@@ -66,10 +64,10 @@ class Fundamentals extends Robinhood {
 		return new Promise((resolve, reject) => {
 			if (!array instanceof Array) reject(new Error("Parameter 'array' must be an array."));
 			else if (!user) reject(new Error("Parameter 'user' must be set."));
-			else request({
-				headers: Object.assign({
+			else Robinhood.request({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS),
+				},
 				uri: "https://api.robinhood.com/fundamentals/?symbols=" + array.join()
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
@@ -91,11 +89,11 @@ class Fundamentals extends Robinhood {
 		return new Promise((resolve, reject) => {
 			if (!url instanceof String) reject(new Error("Parameter 'url' must be a string."));
 			else if (!user) reject(new Error("Parameter 'user' must be set."));
-			else request({
+			else Robinhood.request({
 				uri: url,
-				headers: Object.assign({
+				headers: {
 					'Authorization': 'Bearer ' + user.getAuthToken()
-				}, HEADERS)
+				}
 			}, (error, response, body) => {
 				return Robinhood.handleResponse(error, response, body, null, res => {
 					resolve(new Fundamentals(res, user));
