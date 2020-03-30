@@ -53,7 +53,7 @@ class Market extends Robinhood {
 		return new Promise((resolve, reject) => {
 			if (!code instanceof String) reject(new Error("Parameter 'code' must be a string."));
       const now = new Date();
-      if (this.MICcache[code] && (now - this.MICcache[code].date) < ONE_HOUR) {
+      if (this.MICcache[code] && (now - this.MICcache[code].date) < this.ONE_HOUR) {
         resolve(this.MICcache[code].value);
         return;
       }
