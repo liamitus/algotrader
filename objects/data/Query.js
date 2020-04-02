@@ -1,5 +1,6 @@
 const LibraryError = require('../globals/LibraryError');
 const Robinhood = require('../broker/robinhood/Robinhood');
+const Instrument = require('../broker/robinhood/Instrument');
 const request = require('request');
 const cheerio = require('cheerio');
 
@@ -41,12 +42,21 @@ class Query {
 		})
 	}
 
-	static getTopMovers(days, user) {
-		return new Promise((resolve, reject) => {
-			Robinhood.request({
-				uri: "https://api.robinhood.com/midlands/tags/tag/top-movers/",
-			}, (error, response, body) => {
-				return Robinhood.handleResponse(error, response, body, null, resolve, reject);
+  static getTopMovers(user) {
+    return new Promise((resolve, reject) => {
+      Robinhood.request({
+        uri: "https://api.robinhood.com/midlands/tags/tag/top-movers/",
+      }, (error, response, body) => {
+        new Promise((resolveInner) => {
+          Robinhood.handleResponse(error, response, body, null, resolveInner, reject);
+        }).then((listOfInstruments) => {
+          let promises = listOfInstruments.instruments.map((i) => {
+            return Instrument.getByURL(i, user)
+          })
+          Promise.all(promises).then((allInstruments) => {
+            resolve(allInstruments)
+          })
+        })
 			})
 		})
 	};
