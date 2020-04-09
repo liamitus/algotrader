@@ -601,7 +601,7 @@ class User extends Robinhood {
 		const _this = this;
 		return new Promise((resolve, reject) => {
 			request({
-				uri: _this.url + "/accounts/" + _this.account + "/positions/",
+				uri: _this.url + "/positions/",
 				headers: {
 					'Authorization': 'Bearer ' + _this.getAuthToken()
 				},
