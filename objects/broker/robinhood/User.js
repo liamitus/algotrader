@@ -610,6 +610,9 @@ class User extends Robinhood {
 				}
 			}, (error, response, body) => {
 				Robinhood.handleResponse(error, response, body, _this.token, res => {
+          if (!Array.isArray(res)) {
+            res = [res];
+          }
 					let array = [];
 					async.forEachOf(res, (position, key, callback) => {
 						position.quantity = Number(position.quantity);
