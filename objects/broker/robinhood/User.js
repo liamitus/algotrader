@@ -124,9 +124,10 @@ class User extends Robinhood {
 					username: _this.username,
 					password: _this.password,
 					client_id: 'c82SH0WZOsabOXGP2sxqcj34FxkvfnWRZBKlBjFS',
+					device_token: _this.deviceToken,
 					grant_type: 'password',
 					scope: 'internal',
-					mfa_code: mfaCode
+					mfa_code: mfaCode,
 				}
 			}, (error, response, body) => {
 				if (error) reject(error);
