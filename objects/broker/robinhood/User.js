@@ -615,6 +615,8 @@ class User extends Robinhood {
             res = [res];
           }
 					let array = [];
+					
+					if (!Array.isArray(res)) res = [res];
 					async.forEachOf(res, (position, key, callback) => {
 						position.quantity = Number(position.quantity);
 						if (position.quantity !== 0) {
