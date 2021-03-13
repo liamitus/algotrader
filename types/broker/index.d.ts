@@ -1,1 +1,1 @@
-export * from './robinhood'
+export * as Robinhood from './robinhood'

@@ -1,4 +1,4 @@
-export * from './algorithm'
-export * from './broker'
-export * from './data'
-export * from './globals'
+export * as Algorithm from './algorithm'
+export * as Broker from './broker'
+export * as Data from './data'
+export * as Globals from './globals'
