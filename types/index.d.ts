@@ -1,4 +1,5 @@
 export * as Algorithm from './algorithm'
 export * as Broker from './broker'
+export * as Robinhood from './broker/robinhood'
 export * as Data from './data'
 export * as Globals from './globals'
