@@ -24,9 +24,19 @@ class IEX {
 				uri: url + endpoint + tokenStr,
 				qs: qs
 			}, (error, response, body) => {
-				if (error) reject(error);
-				else if (response.statusCode !== 200) reject(new LibraryError(body));
-				else resolve(JSON.parse(body), body);
+				if (error) {
+          reject(error);
+        } else if (response.statusCode !== 200) {
+          reject(new LibraryError(body));
+        } else {
+          try {
+            const json = JSON.parse(body);
+            resolve(json, body);
+          } catch (e) {
+            console.error(e)
+            reject(new LibraryError(body))
+          }
+        }
 			})
 		});
 	}
